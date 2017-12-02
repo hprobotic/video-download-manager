@@ -5,10 +5,10 @@ var commander 	= require('commander');
 var download 	= require('./download');
 
 commander
-  .command('dl <url>')
+  .command('dl <url> <isDelete>')
   .description('Download Videos Of Particular Course')
-  .action(function(url) {
-    download.boot(url);
+  .action(function(url, isDelete) {
+    download.boot(url, isDelete);
 });
 
 commander.parse(process.argv);

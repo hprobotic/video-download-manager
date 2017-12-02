@@ -1,6 +1,6 @@
 var url = require('url');
 var request = require('request');
-var fs = require('fs');
+var fs = require('fs-extra');
 var path = require('path');
 var progress = require('request-progress');
 var ProgressBar = require('progress');
@@ -8,7 +8,7 @@ var VIDEO_URLS = [];
 var TOTAL_COMPLETED = 0;
 var TOTAL_VIDEOS;
 
-var boot = function(jsonEnpoint) {
+var boot = function(jsonEnpoint, isDelete) {
   var options = {
     url: jsonEnpoint
   };
@@ -16,12 +16,12 @@ var boot = function(jsonEnpoint) {
     if (error) {
       console.log(error);
     } else {
-      processDownInfo(body);
+      processDownInfo(body, isDelete);
     }
   });
 };
 
-var processDownInfo = function(body) {
+var processDownInfo = function(body, isDelete) {
   var videos, directory;
 
   try {
@@ -34,6 +34,20 @@ var processDownInfo = function(body) {
   directory.split('/').forEach((dir, index, splits) => {
     const parent = splits.slice(0, index).join('/');
     const dirPath = path.resolve(parent, dir);
+    if (!fs.existsSync(dirPath) || isDelete) {
+      if (isDelete) {
+        if(index === 7) {
+          console.log(dirPath)
+          fs.remove(dirPath, err => {
+            console.log('Remove: ', dirPath)
+            if (err) return console.log('Error: ', err)
+            fs.mkdirSync(dirPath)
+            console.log('Remove old videos')
+            return
+          })
+        }
+      }
+    }
     if (!fs.existsSync(dirPath)) {
       fs.mkdirSync(dirPath);
     }
